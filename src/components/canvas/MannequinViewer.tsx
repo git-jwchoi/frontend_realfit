@@ -18,7 +18,7 @@ const MannequinModel = ({ url }: { url: string }) => {
     if ((child as THREE.Mesh).isMesh) {
       const mesh = child as THREE.Mesh
       mesh.material = new THREE.MeshStandardMaterial({
-        color: '#d4c096ff', // 자연스러운 피부톤 베이지
+        color: '#d4c096', // 자연스러운 피부톤 베이지
         roughness: 0.7,
         metalness: 0.0,
       })
@@ -32,7 +32,7 @@ export const MannequinViewer: React.FC = () => {
   const { modelUrl, isLoading } = useFittingStore()
 
   return (
-    <div className="w-full h-full bg-slate-800 rounded-xl overflow-hidden shadow-2xl relative border border-slate-700/50">
+    <div className="w-full h-full bg-[#1a1a1a] rounded-2xl overflow-hidden relative">
       {isLoading && (
         <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm">
           <div className="text-blue-400 font-semibold text-lg animate-pulse">Loading 3D Mannequin...</div>
