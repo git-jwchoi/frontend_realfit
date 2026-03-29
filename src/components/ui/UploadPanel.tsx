@@ -18,7 +18,7 @@ export const UploadPanel: React.FC = () => {
     if (!photoFile) return
     setIsLoading(true)
     setTimeout(() => {
-      setModelUrl('/mock/mock_mannequin.glb')
+      setModelUrl('/mock/test_0.obj')
       setIsLoading(false)
     }, 3000)
   }
