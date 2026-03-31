@@ -2,6 +2,8 @@ import { MannequinViewer } from './components/canvas/MannequinViewer'
 import { UploadPanel } from './components/ui/UploadPanel'
 import { SculptPanel } from './components/ui/SculptPanel'
 import { HomePanel } from './components/ui/HomePanel'
+import { ArchivePanel } from './components/ui/ArchivePanel'
+import { AboutPanel } from './components/ui/AboutPanel'
 import { useFittingStore } from './store/useFittingStore'
 
 function App() {
@@ -30,8 +32,18 @@ function App() {
           >
             Atelier
           </button>
-          <button className="hover:text-gray-900 transition-colors">Archive</button>
-          <button className="hover:text-gray-900 transition-colors">About</button>
+          <button 
+            onClick={() => setCurrentPage('ARCHIVE')}
+            className={`transition-colors ${currentPage === 'ARCHIVE' ? 'text-gray-900 border-b-2 border-blue-500 pb-1' : 'hover:text-gray-900'}`}
+          >
+            Archive
+          </button>
+          <button 
+            onClick={() => setCurrentPage('ABOUT')}
+            className={`transition-colors ${currentPage === 'ABOUT' ? 'text-gray-900 border-b-2 border-blue-500 pb-1' : 'hover:text-gray-900'}`}
+          >
+            About
+          </button>
         </nav>
         <div className="flex gap-4 text-gray-500">
           <button className="hover:text-gray-900 transition-colors">🛒</button>
@@ -43,6 +55,14 @@ function App() {
       {currentPage === 'HOME' ? (
         <div className="flex-1 overflow-auto bg-white">
           <HomePanel />
+        </div>
+      ) : currentPage === 'ARCHIVE' ? (
+        <div className="flex-1 overflow-auto bg-gray-50">
+          <ArchivePanel />
+        </div>
+      ) : currentPage === 'ABOUT' ? (
+        <div className="flex-1 overflow-auto bg-white">
+          <AboutPanel />
         </div>
       ) : (
         <div className="flex-1 flex">

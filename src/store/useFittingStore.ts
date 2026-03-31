@@ -26,7 +26,7 @@ export interface FittingState {
   };
 
   // 페이지 라우팅
-  currentPage: 'HOME' | 'ATELIER';
+  currentPage: 'HOME' | 'ATELIER' | 'ARCHIVE' | 'ABOUT';
 
   // 상태 변경 메서드
   setPhoto: (file: File | null, previewUrl: string | null) => void;
@@ -38,7 +38,7 @@ export interface FittingState {
   setActiveTab: (tab: '3d' | '2d') => void;
   setActiveTool: (tool: 'VIEW' | 'SCULPT' | 'TEXTURE' | 'LIGHT') => void;
   setBodyParams: (params: { height?: number; width?: number; depth?: number }) => void;
-  setCurrentPage: (page: 'HOME' | 'ATELIER') => void;
+  setCurrentPage: (page: 'HOME' | 'ATELIER' | 'ARCHIVE' | 'ABOUT') => void;
 }
 
 export const useFittingStore = create<FittingState>((set) => ({

@@ -66,7 +66,7 @@ const ObjModel = ({ url }: { url: string }) => {
   return (
     <group position={[0, -targetSize / 2, 0]}>
       <group scale={[scale * bodyParams.width, scale * bodyParams.height, scale * bodyParams.depth]}>
-        <group rotation={[0, Math.PI, 0]}>
+        <group rotation={[0, 0, 0]}>
           <primitive 
             object={clonedObj} 
             position={[-center.x, -minY, -center.z]} 
@@ -110,6 +110,7 @@ const GlbModel = ({ url }: { url: string }) => {
     <primitive 
       object={scene} 
       position={[0, -1.2, 0]} 
+      rotation={[0, Math.PI, 0]}
       scale={[baseScale * bodyParams.width, baseScale * bodyParams.height, baseScale * bodyParams.depth]} 
     />
   )
