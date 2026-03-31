@@ -15,6 +15,23 @@ export const generate3DModel = async (userPhoto: File): Promise<string> => {
       console.log(`- ${key}:`, value instanceof File ? `File(${value.name}, ${value.type})` : value);
     }
     
+    // TODO: 백엔드 API 연동 시 아래 코드를 주석 해제하여 사용하세요.
+    /*
+    try {
+      const response = await fetch('https://api.yourbackend.com/v1/generate-3d', {
+        method: 'POST',
+        // FormData는 브라우저가 boundary를 자동 생성하여 Content-Type을 지정하므로 헤더 설정 생략 필수
+        body: formData,
+      });
+      if (!response.ok) throw new Error('API request failed');
+      const data = await response.json();
+      resolve(data.model_url); // 서버에서 넘겨주는 3D 모델(OBJ/GLB) 주소
+    } catch (e) {
+      // 오류 처리 로직
+      // reject(e);
+    }
+    */
+    
     // 2. 가짜 통신 지연 (3초)
     setTimeout(() => {
       console.log('--- [API Response: Success] ---');
@@ -42,6 +59,21 @@ export const generateVTONResult = async (userPhoto: File, clothingPhoto: File, c
     for (let [key, value] of formData.entries()) {
       console.log(`- ${key}:`, value instanceof File ? `File(${value.name}, ${value.type})` : value);
     }
+    
+    // TODO: 백엔드(OOTDiffusion 등) 구동 완료 시 아래 fetch 로직을 주석 해제하여 사용
+    /*
+    try {
+      const response = await fetch('https://api.yourbackend.com/v1/generate-vton', {
+        method: 'POST',
+        body: formData,
+      });
+      if (!response.ok) throw new Error('VTON Image generation failed');
+      const data = await response.json();
+      resolve(data.result_image_url); // 최종 생성된 2D 피팅 합성 이미지 URL
+    } catch (e) {
+      // reject(e);
+    }
+    */
     
     // 2. 가짜 통신 지연 (3초)
     setTimeout(() => {
