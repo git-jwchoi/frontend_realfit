@@ -8,6 +8,7 @@ import { useFittingStore } from '../../store/useFittingStore'
 // OBJ 파일 렌더링 컴포넌트 (버그 없는 자동 센터링 및 스케일링)
 const ObjModel = ({ url }: { url: string }) => {
   const obj = useLoader(OBJLoader, url)
+  const { bodyParams, customColor } = useFittingStore()
 
   // 1단계: 원본 캐시 오염을 막기 위한 복제 및 재질/법선 세팅
   const clonedObj = useMemo(() => {
@@ -19,15 +20,22 @@ const ObjModel = ({ url }: { url: string }) => {
         if (!geometry.attributes.normal) {
           geometry.computeVertexNormals()
         }
+
+        let colorValue = '#d4c096';
+        if (customColor && customColor !== 'transparent') {
+          colorValue = customColor;
+        }
+
         if (geometry.attributes.color) {
           mesh.material = new THREE.MeshStandardMaterial({
             vertexColors: true,
             roughness: 0.6,
             metalness: 0.0,
+            color: colorValue !== '#d4c096' ? colorValue : undefined,
           })
         } else {
           mesh.material = new THREE.MeshStandardMaterial({
-            color: '#d4c096',
+            color: colorValue,
             roughness: 0.7,
             metalness: 0.0,
           })
@@ -35,7 +43,7 @@ const ObjModel = ({ url }: { url: string }) => {
       }
     })
     return clone
-  }, [obj])
+  }, [obj, customColor])
 
   // 2단계: 크기와 중심점 계산 (단 1회)
   const { center, maxDim, minY } = useMemo(() => {
@@ -57,7 +65,7 @@ const ObjModel = ({ url }: { url: string }) => {
   // 최상단 그룹은 Y를 반만큼 내려서 카메라 시야의 정중앙에 전신이 오도록 맞춤
   return (
     <group position={[0, -targetSize / 2, 0]}>
-      <group scale={scale}>
+      <group scale={[scale * bodyParams.width, scale * bodyParams.height, scale * bodyParams.depth]}>
         <group rotation={[0, Math.PI, 0]}>
           <primitive 
             object={clonedObj} 
@@ -71,6 +79,7 @@ const ObjModel = ({ url }: { url: string }) => {
 
 // GLB 파일 렌더링 컴포넌트
 const GlbModel = ({ url }: { url: string }) => {
+  const { bodyParams, customColor } = useFittingStore()
   const loadUrl = url === '/mock/mock_mannequin.glb'
     ? 'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/models/gltf/Xbot.glb'
     : url
@@ -81,16 +90,29 @@ const GlbModel = ({ url }: { url: string }) => {
     scene.traverse((child) => {
       if ((child as THREE.Mesh).isMesh) {
         const mesh = child as THREE.Mesh
+        
+        let colorValue = '#d4c096';
+        if (customColor && customColor !== 'transparent') {
+          colorValue = customColor;
+        }
+
         mesh.material = new THREE.MeshStandardMaterial({
-          color: '#d4c096',
+          color: colorValue,
           roughness: 0.7,
           metalness: 0.0,
         })
       }
     })
-  }, [scene])
+  }, [scene, customColor])
 
-  return <primitive object={scene} position={[0, -1.2, 0]} scale={1.3} />
+  const baseScale = 1.3
+  return (
+    <primitive 
+      object={scene} 
+      position={[0, -1.2, 0]} 
+      scale={[baseScale * bodyParams.width, baseScale * bodyParams.height, baseScale * bodyParams.depth]} 
+    />
+  )
 }
 
 // URL 확장자에 따라 적절한 로더를 선택하는 분기 컴포넌트
