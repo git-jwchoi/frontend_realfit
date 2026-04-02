@@ -1,43 +1,31 @@
-
-
 /**
  * 3D 마네킹 생성 로직 (사용자 사진 하나만 전송)
  */
 export const generate3DModel = async (userPhoto: File): Promise<string> => {
-  return new Promise((resolve) => {
-    // 1. 서버로 전송할 FormData 생성
+  return new Promise(async (resolve, reject) => {
     const formData = new FormData();
     formData.append('user_image', userPhoto);
     
     console.log('--- [API Request: Generate 3D Model] ---');
     console.log('Sending FormData:');
-    for (let [key, value] of formData.entries()) {
-      console.log(`- ${key}:`, value instanceof File ? `File(${value.name}, ${value.type})` : value);
-    }
     
-    // TODO: 백엔드 API 연동 시 아래 코드를 주석 해제하여 사용하세요.
-    /*
     try {
-      const response = await fetch('https://api.yourbackend.com/v1/generate-3d', {
+      const response = await fetch('http://localhost:8000/api/v1/generate-3d', {
         method: 'POST',
-        // FormData는 브라우저가 boundary를 자동 생성하여 Content-Type을 지정하므로 헤더 설정 생략 필수
         body: formData,
       });
+      
       if (!response.ok) throw new Error('API request failed');
       const data = await response.json();
-      resolve(data.model_url); // 서버에서 넘겨주는 3D 모델(OBJ/GLB) 주소
+      
+      // 도커 백엔드의 응답은 '/static/dummy/...' 상대경로입니다. 앱 로드를 위해 절대 주소로 바꿉니다.
+      const fullUrl = data.model_url.startsWith('http') ? data.model_url : 'http://localhost:8000' + data.model_url;
+      console.log('--- [API Response: Success] 3D Model URL:', fullUrl);
+      resolve(fullUrl); 
     } catch (e) {
-      // 오류 처리 로직
-      // reject(e);
+      console.error('Backend connection error (3D):', e);
+      reject(e);
     }
-    */
-    
-    // 2. 가짜 통신 지연 (3초)
-    setTimeout(() => {
-      console.log('--- [API Response: Success] ---');
-      // 성공 시 백엔드에서 생성된 3D OBJ의 고유 ULR을 문자열로 반환한다고 가장
-      resolve('/mock/test_0.obj'); 
-    }, 3000);
   });
 };
 
@@ -45,8 +33,7 @@ export const generate3DModel = async (userPhoto: File): Promise<string> => {
  * 2D VTON(옷 입히기) 생성 로직 (사용자 사진 + 옷 사진 전송 + 디자인 색상)
  */
 export const generateVTONResult = async (userPhoto: File, clothingPhoto: File, customColor: string): Promise<string> => {
-  return new Promise((resolve) => {
-    // 1. 서버로 전송할 FormData 생성
+  return new Promise(async (resolve, reject) => {
     const formData = new FormData();
     formData.append('user_image', userPhoto);
     formData.append('clothing_image', clothingPhoto);
@@ -56,30 +43,22 @@ export const generateVTONResult = async (userPhoto: File, clothingPhoto: File, c
     
     console.log('--- [API Request: Generate VTON] ---');
     console.log('Sending FormData:');
-    for (let [key, value] of formData.entries()) {
-      console.log(`- ${key}:`, value instanceof File ? `File(${value.name}, ${value.type})` : value);
-    }
     
-    // TODO: 백엔드(OOTDiffusion 등) 구동 완료 시 아래 fetch 로직을 주석 해제하여 사용
-    /*
     try {
-      const response = await fetch('https://api.yourbackend.com/v1/generate-vton', {
+      const response = await fetch('http://localhost:8000/api/v1/generate-vton', {
         method: 'POST',
         body: formData,
       });
+      
       if (!response.ok) throw new Error('VTON Image generation failed');
       const data = await response.json();
-      resolve(data.result_image_url); // 최종 생성된 2D 피팅 합성 이미지 URL
+      
+      const fullUrl = data.result_image_url.startsWith('http') ? data.result_image_url : 'http://localhost:8000' + data.result_image_url;
+      console.log('--- [API Response: Success] VTON URL:', fullUrl);
+      resolve(fullUrl); 
     } catch (e) {
-      // reject(e);
+      console.error('Backend connection error (VTON):', e);
+      reject(e);
     }
-    */
-    
-    // 2. 가짜 통신 지연 (3초)
-    setTimeout(() => {
-      console.log('--- [API Response: Success] ---');
-      // VTON 결과를 나타내는 목업 2D 이미지 반환 (현재는 테스트 이미지 사용)
-      resolve('https://dummyimage.com/600x800/2a2a2a/ffffff.png&text=VTON+Result+Mock'); 
-    }, 3000);
   });
 };
