@@ -1,6 +1,6 @@
 import React, { Suspense, useMemo } from 'react'
 import { Canvas, useLoader } from '@react-three/fiber'
-import { OrbitControls, Environment, ContactShadows, useGLTF } from '@react-three/drei'
+import { OrbitControls, Environment, ContactShadows, useGLTF, Center } from '@react-three/drei'
 import * as THREE from 'three'
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js'
 import { useFittingStore } from '../../store/useFittingStore'
@@ -8,7 +8,7 @@ import { useFittingStore } from '../../store/useFittingStore'
 // OBJ 파일 렌더링 컴포넌트 (버그 없는 자동 센터링 및 스케일링)
 const ObjModel = ({ url }: { url: string }) => {
   const obj = useLoader(OBJLoader, url)
-  const { bodyParams, customColor } = useFittingStore()
+  const { sculptModifiers } = useFittingStore()
 
   // 1단계: 원본 캐시 오염을 막기 위한 복제 및 재질/법선 세팅
   const clonedObj = useMemo(() => {
@@ -21,21 +21,15 @@ const ObjModel = ({ url }: { url: string }) => {
           geometry.computeVertexNormals()
         }
 
-        let colorValue = '#d4c096';
-        if (customColor && customColor !== 'transparent') {
-          colorValue = customColor;
-        }
-
         if (geometry.attributes.color) {
           mesh.material = new THREE.MeshStandardMaterial({
             vertexColors: true,
             roughness: 0.6,
             metalness: 0.0,
-            color: colorValue !== '#d4c096' ? colorValue : undefined,
           })
         } else {
           mesh.material = new THREE.MeshStandardMaterial({
-            color: colorValue,
+            color: '#d4c096',
             roughness: 0.7,
             metalness: 0.0,
           })
@@ -43,7 +37,7 @@ const ObjModel = ({ url }: { url: string }) => {
       }
     })
     return clone
-  }, [obj, customColor])
+  }, [obj])
 
   // 2단계: 크기와 중심점 계산 (단 1회)
   const { center, maxDim, minY } = useMemo(() => {
@@ -60,12 +54,13 @@ const ObjModel = ({ url }: { url: string }) => {
   const targetSize = 3.0 // 뷰어 높이 (카메라 시야에 꽉 차게)
   const scale = maxDim > 0 ? targetSize / maxDim : 1.0
 
-  // 3단계: 계층 구조로 완벽한 Transform 적용
-  // Scale 적용 -> Y축 회전(정면) -> 기하학적 중심을 원점(Y=0)으로 이동
-  // 최상단 그룹은 Y를 반만큼 내려서 카메라 시야의 정중앙에 전신이 오도록 맞춤
   return (
     <group position={[0, -targetSize / 2, 0]}>
-      <group scale={[scale * bodyParams.width, scale * bodyParams.height, scale * bodyParams.depth]}>
+      <group scale={[
+        scale * sculptModifiers.width, 
+        scale * sculptModifiers.height, 
+        scale * sculptModifiers.depth
+      ]}>
         <group rotation={[0, 0, 0]}>
           <primitive 
             object={clonedObj} 
@@ -79,7 +74,7 @@ const ObjModel = ({ url }: { url: string }) => {
 
 // GLB 파일 렌더링 컴포넌트
 const GlbModel = ({ url }: { url: string }) => {
-  const { bodyParams, customColor } = useFittingStore()
+  const { sculptModifiers } = useFittingStore()
   const loadUrl = url === '/mock/mock_mannequin.glb'
     ? 'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/models/gltf/Xbot.glb'
     : url
@@ -90,29 +85,28 @@ const GlbModel = ({ url }: { url: string }) => {
     scene.traverse((child) => {
       if ((child as THREE.Mesh).isMesh) {
         const mesh = child as THREE.Mesh
-        
-        let colorValue = '#d4c096';
-        if (customColor && customColor !== 'transparent') {
-          colorValue = customColor;
-        }
-
         mesh.material = new THREE.MeshStandardMaterial({
-          color: colorValue,
+          color: '#d4c096',
           roughness: 0.7,
           metalness: 0.0,
         })
       }
     })
-  }, [scene, customColor])
+  }, [scene])
 
   const baseScale = 1.3
   return (
-    <primitive 
-      object={scene} 
-      position={[0, -1.2, 0]} 
-      rotation={[0, Math.PI, 0]}
-      scale={[baseScale * bodyParams.width, baseScale * bodyParams.height, baseScale * bodyParams.depth]} 
-    />
+    <Center>
+      <primitive 
+        object={scene} 
+        rotation={[0, Math.PI, 0]}
+        scale={[
+          baseScale * sculptModifiers.width, 
+          baseScale * sculptModifiers.height, 
+          baseScale * sculptModifiers.depth
+        ]} 
+      />
+    </Center>
   )
 }
 

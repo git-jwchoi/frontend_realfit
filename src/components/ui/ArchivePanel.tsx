@@ -1,46 +1,8 @@
 import React from 'react'
 import { useFittingStore } from '../../store/useFittingStore'
 
-const MOCK_ARCHIVES = [
-  {
-    id: 1,
-    date: '2026.03.31',
-    description: 'Casual Spring Look',
-    imageUrl: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&q=80',
-    tags: ['Daily', 'Denim']
-  },
-  {
-    id: 2,
-    date: '2026.03.28',
-    description: 'Formal Setup for Interview',
-    imageUrl: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=600&auto=format&fit=crop',
-    tags: ['Suit', 'Dark']
-  },
-  {
-    id: 3,
-    date: '2026.03.25',
-    description: 'Weekend Streetwear',
-    imageUrl: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?q=80&w=600&auto=format&fit=crop',
-    tags: ['Street', 'Oversized']
-  },
-  {
-    id: 4,
-    date: '2026.03.10',
-    description: 'Summer Vibe Check',
-    imageUrl: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=600&auto=format&fit=crop',
-    tags: ['Summer', 'Tee']
-  },
-  {
-    id: 5,
-    date: '2026.02.14',
-    description: 'Valentine Date Outfit',
-    imageUrl: 'https://images.unsplash.com/photo-1620799140188-3b2a02fd9a77?q=80&w=600&auto=format&fit=crop',
-    tags: ['Date', 'Knit']
-  },
-]
-
 export const ArchivePanel: React.FC = () => {
-  const { setCurrentPage, setVtonResultUrl, setActiveTab } = useFittingStore()
+  const { setCurrentPage, setVtonResultUrl, setActiveTab, savedArchives, removeFromArchive } = useFittingStore()
 
   const handleLoadArchive = (imageUrl: string) => {
     setVtonResultUrl(imageUrl)
@@ -49,19 +11,19 @@ export const ArchivePanel: React.FC = () => {
   }
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-8 py-12">
-      <div className="flex flex-col mb-12 border-b border-gray-200 pb-8">
-        <h2 className="text-4xl font-serif font-medium text-gray-900 mb-3 tracking-tight">My Virtual Closet</h2>
-        <p className="text-gray-500 font-light flex items-center justify-between">
-          <span>Explore and revisit your previously generated VTON results.</span>
-          <span className="text-xs font-bold tracking-widest uppercase bg-gray-100 px-3 py-1 rounded-full">{MOCK_ARCHIVES.length} Saved</span>
+    <div className="w-full max-w-7xl mx-auto px-8 py-12 transition-colors duration-500">
+      <div className="flex flex-col mb-12 border-b border-gray-200 dark:border-white/10 pb-8 transition-colors duration-500">
+        <h2 className="text-4xl font-serif font-medium text-gray-900 dark:text-white mb-3 tracking-tight transition-colors duration-500">My Virtual Closet</h2>
+        <p className="text-gray-500 dark:text-zinc-400 font-light flex items-center justify-between transition-colors duration-500">
+          <span>이전에 생성한 가상 피팅 결과물들을 한곳에서 편하게 확인해보세요.</span>
+          <span className="text-xs font-bold tracking-widest uppercase bg-gray-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 px-3 py-1 rounded-full">{savedArchives.length} Saved</span>
         </p>
       </div>
 
-      <div className="columns-1 sm:columns-2 lg:columns-3 gap-8 space-y-8">
-        {MOCK_ARCHIVES.map((item) => (
-          <div key={item.id} className="break-inside-avoid group cursor-pointer relative rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 bg-white">
-            <div className="relative aspect-[3/4] overflow-hidden bg-gray-100">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        {savedArchives.map((item) => (
+          <div key={item.id} className="group cursor-pointer relative rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 bg-white dark:bg-zinc-900 flex flex-col">
+            <div className="relative aspect-[3/4] overflow-hidden bg-gray-100 dark:bg-zinc-800">
               <img 
                 src={item.imageUrl} 
                 alt={item.description} 
@@ -76,15 +38,31 @@ export const ArchivePanel: React.FC = () => {
                   Load to Atelier
                 </button>
               </div>
+              
+              {/* Delete Button (visible on hover) */}
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if(confirm('이 항목을 삭제하시겠습니까?')) {
+                    removeFromArchive(item.id);
+                  }
+                }}
+                className="absolute top-4 right-4 w-10 h-10 bg-white/90 backdrop-blur text-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-red-500 hover:text-white transition-all duration-300 shadow-sm z-10"
+                title="Delete"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
             </div>
-            <div className="p-5 border border-t-0 border-gray-100 rounded-b-2xl">
+            <div className="p-5 border border-t-0 border-gray-100 dark:border-white/5 rounded-b-2xl">
               <div className="flex justify-between items-start mb-2">
-                <h3 className="font-medium text-gray-900 text-lg leading-tight">{item.description}</h3>
-                <span className="text-xs text-gray-400 font-mono tracking-tighter shrink-0">{item.date}</span>
+                <h3 className="font-medium text-gray-900 dark:text-zinc-100 text-lg leading-tight">{item.description}</h3>
+                <span className="text-xs text-gray-400 dark:text-zinc-500 font-mono tracking-tighter shrink-0">{item.date}</span>
               </div>
               <div className="flex gap-2 flex-wrap mt-3">
                 {item.tags.map(tag => (
-                  <span key={tag} className="text-[10px] uppercase tracking-wider font-bold text-gray-500 bg-gray-50 px-2.5 py-1 rounded-md border border-gray-100">
+                  <span key={tag} className="text-[10px] uppercase tracking-wider font-bold text-gray-500 dark:text-zinc-400 bg-gray-50 dark:bg-zinc-800/50 px-2.5 py-1 rounded-md border border-gray-100 dark:border-white/5">
                     {tag}
                   </span>
                 ))}
@@ -95,16 +73,16 @@ export const ArchivePanel: React.FC = () => {
       </div>
       
       {/* Empty State Mock */}
-      {MOCK_ARCHIVES.length === 0 && (
+      {savedArchives.length === 0 && (
         <div className="py-32 flex flex-col items-center justify-center text-center">
-          <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-6">
-            <span className="text-4xl text-gray-300">📦</span>
+          <div className="w-24 h-24 bg-gray-50 dark:bg-zinc-800 rounded-full flex items-center justify-center mb-6">
+            <span className="text-4xl text-gray-300 dark:text-zinc-600">📦</span>
           </div>
-          <h3 className="text-xl font-medium text-gray-900 mb-2">Your closet is empty</h3>
-          <p className="text-gray-500 mb-8 max-w-md mx-auto">You haven't saved any virtual try-on results yet. Go to the Atelier and generate your first fit.</p>
+          <h3 className="text-xl font-medium text-gray-900 dark:text-zinc-100 mb-2">옷장이 비어있습니다</h3>
+          <p className="text-gray-500 dark:text-zinc-400 mb-8 max-w-md mx-auto">아직 저장된 가상 피팅 결과가 없습니다. 아뜰리에로 이동하여 나만의 피팅 결과를 만들어보세요.</p>
           <button 
             onClick={() => setCurrentPage('ATELIER')}
-            className="px-8 py-3 bg-black text-white text-sm font-bold uppercase tracking-widest rounded-lg hover:bg-gray-800 transition-colors"
+            className="px-8 py-3 bg-black text-white dark:bg-white dark:text-black text-sm font-bold uppercase tracking-widest rounded-lg hover:bg-gray-800 dark:hover:bg-zinc-200 transition-colors"
           >
             Open Atelier
           </button>

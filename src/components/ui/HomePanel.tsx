@@ -33,15 +33,15 @@ export const HomePanel: React.FC = () => {
     : MOCK_PRODUCTS.filter(p => p.category === activeCategory)
 
   return (
-    <div className="w-full min-h-full bg-[#f9fafb] p-8 md:p-12 overflow-y-auto">
+    <div className="w-full min-h-full bg-[#f9fafb] dark:bg-zinc-950 pt-8 px-8 pb-32 md:pt-12 md:px-12 md:pb-48 overflow-y-auto transition-colors duration-500">
       <div className="max-w-7xl mx-auto">
         
         {/* Hero Section */}
         <div className="mb-10 text-center">
-          <h2 className="text-4xl font-serif font-bold text-gray-900 mb-4 tracking-tight">
+          <h2 className="text-4xl font-serif font-bold text-gray-900 dark:text-white mb-4 tracking-tight">
             New Arrivals
           </h2>
-          <p className="text-gray-500 max-w-2xl mx-auto break-keep">
+          <p className="text-gray-500 dark:text-zinc-400 max-w-2xl mx-auto break-keep">
             이번 시즌 새롭게 입고된 컬렉션을 만나보세요. 마음에 드는 의류를 선택하고 "Try On in 3D" 버튼을 클릭하면, 제품 구매 전 나의 3D 디지털 아바타에 직접 입혀볼 수 있습니다.
           </p>
         </div>
@@ -54,8 +54,8 @@ export const HomePanel: React.FC = () => {
               onClick={() => setActiveCategory(category)}
               className={`px-6 py-2 rounded-full text-xs font-bold tracking-widest uppercase whitespace-nowrap transition-all ${
                 activeCategory === category 
-                  ? 'bg-gray-900 text-white shadow-md cursor-default' 
-                  : 'bg-white text-gray-400 hover:text-gray-900 border border-gray-200 hover:border-gray-400'
+                  ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-black shadow-md cursor-default' 
+                  : 'bg-white dark:bg-zinc-900 text-gray-400 hover:text-gray-900 dark:hover:text-zinc-200 border border-gray-200 dark:border-white/10 hover:border-gray-400 dark:hover:border-zinc-500'
               }`}
             >
               {category}
@@ -69,7 +69,7 @@ export const HomePanel: React.FC = () => {
             <div key={product.id} className="group flex flex-col cursor-pointer">
               
               {/* Product Image Container */}
-              <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-gray-100 mb-4 shadow-sm group-hover:shadow-xl transition-all duration-500">
+              <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-gray-100 dark:bg-zinc-800 mb-4 shadow-sm group-hover:shadow-xl transition-all duration-500">
                 <img 
                   src={product.imageUrl} 
                   alt={product.name} 
@@ -77,14 +77,14 @@ export const HomePanel: React.FC = () => {
                 />
                 
                 {/* Try On Button Overlay */}
-                <div className="absolute inset-0 bg-black/5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <div className="absolute inset-0 bg-black/10 dark:bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       handleTryOn(product);
                     }}
                     disabled={loadingProductId === product.id}
-                    className="translate-y-4 group-hover:translate-y-0 transition-all duration-300 px-6 py-3 bg-white text-gray-900 rounded-full font-bold uppercase tracking-widest text-xs shadow-lg hover:bg-black hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="translate-y-4 group-hover:translate-y-0 transition-all duration-300 px-6 py-3 bg-white dark:bg-zinc-900 text-gray-900 dark:text-white rounded-full font-bold uppercase tracking-widest text-xs shadow-lg hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {loadingProductId === product.id ? 'Loading...' : 'Try On in 3D'}
                   </button>
@@ -93,13 +93,13 @@ export const HomePanel: React.FC = () => {
 
               {/* Product Info */}
               <div className="flex flex-col">
-                <span className="text-[10px] uppercase font-bold tracking-widest text-gray-400 mb-1">
+                <span className="text-[10px] uppercase font-bold tracking-widest text-gray-400 dark:text-zinc-500 mb-1">
                   {product.brand}
                 </span>
-                <h3 className="text-sm font-semibold text-gray-900 mb-1">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-zinc-100 mb-1">
                   {product.name}
                 </h3>
-                <span className="text-sm text-gray-600">
+                <span className="text-sm text-gray-600 dark:text-zinc-400">
                   ₩{product.price.toLocaleString()}
                 </span>
               </div>
