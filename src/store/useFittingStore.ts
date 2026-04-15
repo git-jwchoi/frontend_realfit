@@ -72,6 +72,7 @@ export interface FittingState {
   
   // 기타 UI 상태
   isLoading: boolean;
+  isRemovingBg: boolean;
   loadingType: '3d' | 'vton' | null;
   loadingStage: number; // 0~3
   toastMessage: string | null;
@@ -94,6 +95,7 @@ export interface FittingState {
   setModelUrl: (url: string | null, measurements?: BodyMeasurements | null) => void;
   setVtonResultUrl: (url: string | null) => void;
   setIsLoading: (loading: boolean) => void;
+  setIsRemovingBg: (loading: boolean) => void;
   setLoadingType: (type: '3d' | 'vton' | null) => void;
   setLoadingStage: (stage: number) => void;
   showToast: (message: string) => void;
@@ -120,6 +122,7 @@ export const useFittingStore = create<FittingState>((set) => ({
   bodyMeasurements: null,
   
   isLoading: false,
+  isRemovingBg: false,
   loadingType: null,
   loadingStage: 0,
   toastMessage: null,
@@ -138,6 +141,7 @@ export const useFittingStore = create<FittingState>((set) => ({
   }),
   setVtonResultUrl: (url) => set({ vtonResultUrl: url }),
   setIsLoading: (loading) => set({ isLoading: loading }),
+  setIsRemovingBg: (loading) => set({ isRemovingBg: loading }),
   setLoadingType: (type) => set({ loadingType: type }),
   setLoadingStage: (stage) => set({ loadingStage: stage }),
   showToast: (message) => set({ toastMessage: message }),

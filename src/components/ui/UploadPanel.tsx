@@ -1,6 +1,6 @@
 import React, { useRef } from 'react'
 import { useFittingStore } from '../../store/useFittingStore'
-import { generate3DModel, generateVTONResult } from '../../api'
+import { generate3DModel, generateVTONResult, uploadAndRemoveBackground } from '../../api'
 
 
 
@@ -8,9 +8,9 @@ export const UploadPanel: React.FC = () => {
   const { 
     photoFile, photoPreviewUrl, 
     clothingFile, clothingPreviewUrl,
-    isLoading, 
+    isLoading, isRemovingBg,
     setPhoto, setClothing,
-    setIsLoading, setModelUrl, setVtonResultUrl, setActiveTab 
+    setIsLoading, setIsRemovingBg, setModelUrl, setVtonResultUrl, setActiveTab 
   } = useFittingStore()
   
   const photoInputRef = useRef<HTMLInputElement>(null)
@@ -27,11 +27,32 @@ export const UploadPanel: React.FC = () => {
     }
   }
 
-  const handleClothingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleClothingChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0]
       const previewUrl = URL.createObjectURL(file)
+      
+      // 1. 초기 원본 이미지 세팅 및 로딩 상태 시작
       setClothing(file, previewUrl)
+      
+      const { showToast } = useFittingStore.getState()
+      setIsRemovingBg(true) // 누끼 작업 전용 로딩 시작
+      setIsLoading(true)
+
+      try {
+        // 2. 누끼 따기 및 DB 저장 가상 API 호출
+        const transparentUrl = await uploadAndRemoveBackground(file)
+        
+        // 3. 백엔드에서 내려준 상품(투명/누끼) 이미지로 UI 업데이트
+        setClothing(file, transparentUrl)
+        showToast('🧥 배경이 제거된 상품 이미지가 DB에 저장되었습니다.')
+      } catch (err) {
+        console.error('배경 제거 실패:', err)
+        showToast('❌ 상품 이미지 전처리에 실패했습니다.')
+      } finally {
+        setIsRemovingBg(false)
+        setIsLoading(false)
+      }
     }
   }
 
@@ -71,8 +92,10 @@ export const UploadPanel: React.FC = () => {
   }
 
   const handleGenerateVTON = async () => {
-    if (!photoFile || !clothingFile) return
-    const { setLoadingType, setLoadingStage, showToast } = useFittingStore.getState()
+    // 누끼 따는 중이면 대기
+    if (!photoFile || !clothingFile || isRemovingBg) return
+
+    const { setLoadingType, setLoadingStage, showToast, setActiveTab } = useFittingStore.getState()
     setIsLoading(true)
     setLoadingType('vton')
     setLoadingStage(0)
@@ -170,7 +193,15 @@ export const UploadPanel: React.FC = () => {
 
       <div className="relative rounded-xl overflow-hidden bg-gray-100 dark:bg-zinc-800 border border-gray-200 dark:border-white/10 aspect-square mb-4 group cursor-pointer flex items-center justify-center transition-colors duration-500">
         {clothingPreviewUrl ? (
-          <img src={clothingPreviewUrl} alt="Clothing Upload" className="w-full h-full object-cover" />
+          <>
+            <img src={clothingPreviewUrl} alt="Clothing Upload" className={`w-full h-full object-cover transition-opacity duration-300 ${isRemovingBg ? 'opacity-30 grayscale' : 'opacity-100'}`} />
+            {isRemovingBg && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 text-white pointer-events-none gap-2">
+                 <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                 <span className="text-xs font-bold tracking-widest">상품 이미지 출력 중...</span>
+              </div>
+            )}
+          </>
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center text-gray-400 dark:text-zinc-600 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors pointer-events-none">
             <span className="text-3xl mb-2 grayscale opacity-50 dark:opacity-30">👕</span>

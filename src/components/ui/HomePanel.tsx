@@ -17,9 +17,27 @@ export const HomePanel: React.FC = () => {
       // 2. 내려받은 Blob 이미지를 프론트엔드 File 객체로 강제 캐스팅(포장)
       const file = new File([blob], `${product.id}_clothing.jpg`, { type: blob.type })
       
-      // 3. 상태 저장소에 선택된 옷을 주입하고 화면을 3D 피팅룸으로 넘김
+      // 3. 상태 저장소에 선택된 옷의 원본을 먼저 주입하고 화면을 3D 피팅룸으로 넘김
       setClothing(file, product.imageUrl)
       setCurrentPage('ATELIER')
+
+      // 4. (추가) 화면이 넘어간 뒤 백그라운드에서 누끼 제거(API) 호출 시작
+      const { uploadAndRemoveBackground } = await import('../../api')
+      const { showToast, setIsRemovingBg } = useFittingStore.getState()
+      
+      // 누끼 전용 로딩 스피너 활성화
+      setIsRemovingBg(true)
+      try {
+        const transparentUrl = await uploadAndRemoveBackground(file)
+        setClothing(file, transparentUrl)
+        showToast('🧥 선택하신 상품 이미지의 배경 제거가 완료되었습니다.')
+      } catch (err) {
+        console.error('HomePanel 배경 제거 실패:', err)
+        showToast('❌ 상품 이미지 배경 제거에 실패했습니다.')
+      } finally {
+        setIsRemovingBg(false)
+      }
+
     } catch (error) {
       console.error("Failed to load image for Try-On", error)
       alert("이미지를 불러오는데 실패했습니다.")

@@ -1,5 +1,6 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { useFittingStore } from '../../store/useFittingStore'
+import { getSizeRecommendation } from '../../api'
 
 export const SculptPanel: React.FC = () => {
   const { modelUrl, bodyMeasurements, setActiveTool, sculptModifiers, setSculptModifier, resetSculptModifiers } = useFittingStore()
@@ -148,32 +149,45 @@ export const SculptPanel: React.FC = () => {
   )
 }
 
-// TODO: Replace temp frontend logic with backend API response
 const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'] as const
 
-const getSizeFromChest = (chestWidth: number): string => {
-  // Temporary mapping based on half-chest width (cm)
-  // Will be replaced by backend recommendation
-  if (chestWidth < 24) return 'XS'
-  if (chestWidth < 27) return 'S'
-  if (chestWidth < 30) return 'M'
-  if (chestWidth < 33) return 'L'
-  if (chestWidth < 36) return 'XL'
-  return 'XXL'
-}
-
 const SizeRecommendation = ({ chestWidth }: { chestWidth: number }) => {
-  const recommended = getSizeFromChest(chestWidth)
+  const [recommended, setRecommended] = useState<string>('M')
+  const [confidence, setConfidence] = useState<number>(0)
+  const [detail, setDetail] = useState<string>('추천 사이즈를 분석 중입니다...')
+  const [isFetching, setIsFetching] = useState<boolean>(true)
+
+  useEffect(() => {
+    let isMounted = true
+    setIsFetching(true)
+    
+    getSizeRecommendation(chestWidth).then(res => {
+      if (isMounted) {
+        setRecommended(res.size)
+        setConfidence(res.confidence)
+        setDetail(res.detail)
+        setIsFetching(false)
+      }
+    })
+
+    return () => { isMounted = false }
+  }, [chestWidth])
   
   return (
-    <div className="mt-2 bg-gradient-to-br from-gray-900 to-gray-800 dark:from-zinc-100 dark:to-zinc-300 rounded-xl p-5 shadow-lg shadow-gray-900/10 dark:shadow-white/10 transition-colors">
+    <div className="mt-2 bg-gradient-to-br from-gray-900 to-gray-800 dark:from-zinc-100 dark:to-zinc-300 rounded-xl p-5 shadow-lg shadow-gray-900/10 dark:shadow-white/10 transition-colors relative overflow-hidden">
+      {isFetching && (
+        <div className="absolute inset-0 bg-gray-900/50 dark:bg-zinc-100/50 backdrop-blur-sm z-10 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white dark:border-zinc-900"></div>
+        </div>
+      )}
+      
       <div className="flex items-center gap-2 mb-4">
         <span className="text-lg grayscale opacity-80">👕</span>
-        <p className="text-[10px] text-gray-400 dark:text-zinc-600 font-bold uppercase tracking-widest">Recommended Size</p>
+        <p className="text-[10px] text-gray-400 dark:text-zinc-600 font-bold uppercase tracking-widest">AI Size Recommendation</p>
       </div>
 
       {/* Size Chips */}
-      <div className="flex gap-2 mb-4 justify-center">
+      <div className="flex gap-2 mb-4 justify-center relative z-0">
         {SIZES.map((size) => (
           <div 
             key={size}
@@ -190,17 +204,22 @@ const SizeRecommendation = ({ chestWidth }: { chestWidth: number }) => {
         ))}
       </div>
 
-      {/* Basis Info */}
-      <div className="flex items-center justify-center gap-2 mb-3">
+      {/* Basis Info & Match Rate */}
+      <div className="flex items-center justify-center gap-3 mb-2">
         <span className="text-2xl font-bold text-white dark:text-zinc-900 font-serif">{recommended}</span>
-        <span className="text-xs text-gray-400 dark:text-zinc-600 font-medium">기준: 가슴너비 {chestWidth.toFixed(1)}cm</span>
+        <div className="flex flex-col text-left">
+           <span className="text-[10px] text-gray-400 dark:text-zinc-600 font-medium leading-tight">가슴너비 {chestWidth.toFixed(1)}cm 기준</span>
+           <span className="text-xs font-bold text-green-400 dark:text-green-600 leading-tight">{confidence}% 매칭률</span>
+        </div>
       </div>
+      
+      <p className="text-center text-[11px] text-white/80 dark:text-zinc-800 mb-4 font-medium">{detail}</p>
 
       {/* Disclaimer */}
-      <div className="bg-yellow-500/10 dark:bg-yellow-900/10 rounded-lg px-3 py-2 flex gap-2 items-start">
+      <div className="bg-yellow-500/10 dark:bg-yellow-900/10 rounded-lg px-3 py-2 flex gap-2 items-start mt-2">
         <span className="text-yellow-500 text-xs mt-0.5">⚠️</span>
         <p className="text-[10px] text-yellow-200/70 dark:text-yellow-700 leading-relaxed">
-          AI 추정치입니다. 브랜드별 실제 사이즈 차트와 비교해 주세요.
+          AI 추정치입니다. 브랜드별 실제 사이즈 차트와 비교해 보세요.
         </p>
       </div>
     </div>
