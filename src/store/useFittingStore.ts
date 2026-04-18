@@ -89,6 +89,9 @@ export interface FittingState {
   // 체형 조각(Sculpting) 스케일 조절자
   sculptModifiers: { width: number, height: number, depth: number };
 
+  // 현재 진행 중인 백엔드 Job ID
+  currentJobId: string | null;
+
   // 상태 변경 메서드
   setPhoto: (file: File | null, previewUrl: string | null) => void;
   setClothing: (file: File | null, previewUrl: string | null) => void;
@@ -108,6 +111,7 @@ export interface FittingState {
   setSculptModifier: (axis: 'width' | 'height' | 'depth', value: number) => void;
   resetSculptModifiers: () => void;
   toggleDarkMode: () => void;
+  setCurrentJobId: (jobId: string | null) => void;
 }
 
 export const useFittingStore = create<FittingState>((set) => ({
@@ -132,6 +136,7 @@ export const useFittingStore = create<FittingState>((set) => ({
   isDarkMode: false, // 라이트 모드 기본 시작
   savedArchives: INITIAL_ARCHIVES,
   sculptModifiers: { width: 1.0, height: 1.0, depth: 1.0 },
+  currentJobId: null,
 
   setPhoto: (file, previewUrl) => set({ photoFile: file, photoPreviewUrl: previewUrl }),
   setClothing: (file, previewUrl) => set({ clothingFile: file, clothingPreviewUrl: previewUrl }),
@@ -169,5 +174,6 @@ export const useFittingStore = create<FittingState>((set) => ({
     sculptModifiers: { ...state.sculptModifiers, [axis]: value }
   })),
   resetSculptModifiers: () => set({ sculptModifiers: { width: 1.0, height: 1.0, depth: 1.0 } }),
-  toggleDarkMode: () => set((state) => ({ isDarkMode: !state.isDarkMode }))
+  toggleDarkMode: () => set((state) => ({ isDarkMode: !state.isDarkMode })),
+  setCurrentJobId: (jobId) => set({ currentJobId: jobId }),
 }))
