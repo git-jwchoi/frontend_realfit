@@ -109,11 +109,20 @@ export const UploadPanel: React.FC = () => {
     try {
       const url = await generateVTONResult(photoFile, clothingFile, 'transparent')
       timers.forEach(clearTimeout)
-      setVtonResultUrl(url)
-      setActiveTab('2d')
 
-      if (useFittingStore.getState().currentPage !== 'ATELIER') {
-        showToast('✅ 가상 피팅이 완료되었습니다!')
+      // 백엔드가 2D VTON 대신 3D .glb 파일을 반환하는 경우, 3D 뷰어로 연결
+      if (url.toLowerCase().endsWith('.glb')) {
+        useFittingStore.getState().setModelUrl(url);
+        setActiveTab('3d');
+        if (useFittingStore.getState().currentPage !== 'ATELIER') {
+          showToast('✅ 3D 피팅 결과가 생성되었습니다!');
+        }
+      } else {
+        setVtonResultUrl(url)
+        setActiveTab('2d')
+        if (useFittingStore.getState().currentPage !== 'ATELIER') {
+          showToast('✅ 가상 피팅이 완료되었습니다!')
+        }
       }
     } catch (e) {
       console.error(e)

@@ -81,29 +81,29 @@ const GlbModel = ({ url }: { url: string }) => {
 
   const { scene } = useGLTF(loadUrl)
 
-  useMemo(() => {
-    scene.traverse((child) => {
-      if ((child as THREE.Mesh).isMesh) {
-        const mesh = child as THREE.Mesh
-        mesh.material = new THREE.MeshStandardMaterial({
-          color: '#d4c096',
-          roughness: 0.7,
-          metalness: 0.0,
-        })
-      }
-    })
+  // Tripo3D가 생성한 파일의 색상(텍스처)을 보존하기 위해 강제 색상 오버라이드 안 함
+
+  // bbox 계산으로 자동 스케일링 (화면에 꽉 차게)
+  const { maxDim } = useMemo(() => {
+    const box = new THREE.Box3().setFromObject(scene)
+    const s = box.getSize(new THREE.Vector3())
+    return {
+      maxDim: Math.max(s.x, s.y, s.z),
+    }
   }, [scene])
 
-  const baseScale = 1.3
+  const targetSize = 2.8 // 카메라 시야에 맞춘 타겟 크기
+  const autoScale = maxDim > 0 ? targetSize / maxDim : 1.0
+
   return (
-    <Center>
+    <Center position={[0, -0.2, 0]}>
       <primitive 
         object={scene} 
-        rotation={[0, Math.PI, 0]}
+        rotation={[0, 0, 0]}
         scale={[
-          baseScale * sculptModifiers.width, 
-          baseScale * sculptModifiers.height, 
-          baseScale * sculptModifiers.depth
+          autoScale * sculptModifiers.width, 
+          autoScale * sculptModifiers.height, 
+          autoScale * sculptModifiers.depth
         ]} 
       />
     </Center>
